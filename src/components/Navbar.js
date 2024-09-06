@@ -1,11 +1,18 @@
 import React, { useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom';
+import { Button } from 'react-bootstrap';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 export default function Navbarr() {
+  let navigate  = useNavigate();
   let location = useLocation();
   useEffect(()=> {
     console.log(location.pathname)
   }, [location])
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login')
+  }
   return (
     <nav className="navbar fixed-top navbar-expand-lg navbar-dark  bg-dark">
       <div className="container-fluid">
@@ -22,12 +29,12 @@ export default function Navbarr() {
               <Link className={`nav-link ${location.pathname === '/about' ? "active" : ''}`} to="/about">About</Link>
             </li>
           </ul>
-          <form className="d-flex" role="search">
-            <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-            <button className="btn btn-outline-success" type="submit">Search</button>
-          </form>
+          { !localStorage.getItem("token") ?<form className="d-flex" role="search">
+          <Link  to="/login" className="btn btn-primary mx-2" role="button" >Login</Link>
+          <Link  to="/signup" className="btn btn-primary mx-2" role="button" >Signup</Link>
+          </form> : <Button onClick={handleLogout} className='btn btn-primary'> Logout</Button> }
         </div>
       </div>
-    </nav>
+    </nav> 
   )
 }

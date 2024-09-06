@@ -9,9 +9,9 @@ const fatchUser = require('../middleware/fatchuser');
 const JWT_SECRET = 'inote$book'
 // ROUTH 1 : create a user using "/api/auth/createuser" =====================================
 router.post('/createuser',[
-        body('name').isLength({min:3}),
+        body('name').isLength({min:2}),
         body('email').isEmail(),
-        body('password').isLength({min:5}),
+        body('password').isLength({min:4}),
     ], async (req, res ) => {
     // if there are errors, return bad request and the errors
         const errors = validationResult(req);
@@ -23,7 +23,7 @@ router.post('/createuser',[
             // check whether the user with the same email exits already
             let user = await User.findOne({email: req.body.email})
             if(user){
-                return res.status(400).json({status: "ERROR", message: "Sorry a user with this email already exits"})
+                return res.status(200).json({status: false, message: "Sorry a user with this email already exits"})
             }
 
             const salt = await bcrypt.genSalt(10);
@@ -43,8 +43,7 @@ router.post('/createuser',[
                 }
             }
             const authToken = jwt.sign(data,JWT_SECRET);
-            // res.json({ "status": "SUCCESS","message": "SUCCESS","records" :[user]});
-            res.json({authToken});
+            res.json({status: true , authToken});
               
         } catch (error) {
             console.error(error.message);
@@ -52,7 +51,7 @@ router.post('/createuser',[
         }
     })
 
-//ROUTH 1 : Authenticate a user using "/api/auth/createuser" ==========================================
+//ROUTH 1 : Authenticate a user using "/api/auth/login" ==========================================
 router.post('/login',[
     body('email', 'Enter a valid email').isEmail(),
     body('password', 'Password cannot be blank').exists(),
@@ -68,12 +67,12 @@ router.post('/login',[
     try {
         const user = await User.findOne({email});
         if(!user){
-            return res.status(400).json({status: "ERROR", message: 'Please try to login with correct credential'})
+            return res.status(200).json({status: false, message: 'Please try to login with correct credential'})
         }
 
         const passwordCompare = await bcrypt.compare(password , user.password)
         if(!passwordCompare){
-            return res.status(400).json({status: "ERROR", message: 'Please try to login with correct credential'}) 
+            return res.status(200).json({status: false, message: 'Please try to login with correct credential'}) 
         }
 
         const data = {
@@ -81,7 +80,7 @@ router.post('/login',[
         }
         const authToken = jwt.sign(data,JWT_SECRET);
 
-        res.json({authToken})
+        res.json({status: true, authToken})
 
     } catch (error) {
         res.status(500).send('Internal server error')
@@ -96,7 +95,7 @@ router.post('/getuser', fatchUser,  async (req, res ) => {
     try {
         const userId = req.user._id;
         const user = await User.findById(userId).select('-password')
-        res.json({status: "SUCCESS" , records :[user]})
+        res.json({status: true , records :[user]})
     } catch (error) {
         res.status(500).send('Internal server error')
     }

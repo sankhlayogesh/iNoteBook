@@ -1,4 +1,5 @@
 const connectTOMongo = require('./db');
+var cors = require('cors')
 const express = require('express')
 
 connectTOMongo();
@@ -6,6 +7,7 @@ connectTOMongo();
 const app = express()
 const port = 5000
 
+app.use(cors())
 // app.get('/', (req, res) => {
 //   res.send('Hello yog sa!')
 // })

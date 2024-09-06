@@ -9,7 +9,11 @@ const router = express.Router();
 router.get('/fatch_all_notes', fatchUser,  async (req, res ) => {
     try {
         const notes = await Notes.find({user_id: req.user._id})
-        res.json({status: "SUCCESS", records: notes});
+        if(notes){
+            res.json({success: true, records: notes});
+        }else{
+            res.json({success: false, message: "No Record Found!",  records: null});
+        }
     } catch (error) {
         res.status(500).send("Internal server error")
     }
@@ -31,7 +35,7 @@ router.post('/add_note', fatchUser, [
     
             const note = new Notes({title,description, tag, user_id: req.user._id})
             const saveNote = await note.save();
-            res.json({status: "SUCCESS", records: [saveNote]});
+            res.json({status: true, records: [saveNote]});
             
         } catch (error) {
             res.status(500).send("Internal server error")
@@ -67,6 +71,8 @@ router.put('/update_note/:id', fatchUser,  async (req, res ) => {
 //ROUTE 4 : Delete an exiting notes Using DELETE "/api/notes/delete_note" . Login required ==========================================
 router.delete('/delete_note/:id', fatchUser,  async (req, res ) => {
     try {
+        
+        console.log("id : ",req.params.id)
         let note = await Notes.findById(req.params.id); 
         if(!note){ return res.status(404).json({status: "ERROR", message: "Not Found"})  }
 
@@ -75,7 +81,6 @@ router.delete('/delete_note/:id', fatchUser,  async (req, res ) => {
         }
 
         note = await Notes.findByIdAndDelete(req.params.id)
-        
         res.json({status: "SUCCESS", message: "Note has been deleted"});
 
     } catch (error) {
